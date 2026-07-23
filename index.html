@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <meta
+    name="description"
+    content="A physically-based renderer implemented in C++ and validated against Mitsuba 3."
+  >
+
+  <title>Physically-Based Renderer in C++ | Yağız Gençer</title>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <main>
+    <section class="hero">
+      <p class="eyebrow">EPFL · Advanced Computer Graphics</p>
+
+      <h1>Physically-Based Renderer in C++</h1>
+
+      <p class="intro">
+        A physically-based renderer developed using object-oriented design
+        and Monte Carlo path tracing, with implementations statistically
+        validated against Mitsuba 3.
+      </p>
+
+      <div class="actions">
+        <a class="button primary" href="report.html">
+          View Technical Report
+        </a>
+
+        <a class="button secondary" href="#final-render">
+          View Final Render
+        </a>
+      </div>
+    </section>
+
+    <section id="final-render" class="render-section">
+      <img
+        src="final_rendering/final.png"
+        alt="Final scene rendered using the custom physically-based renderer"
+      >
+
+      <p class="caption">
+        Final scene created in Blender and rendered using the implemented
+        C++ renderer.
+      </p>
+    </section>
+
+    <section class="highlights">
+      <h2>Project highlights</h2>
+
+      <div class="grid">
+        <article>
+          <h3>Monte Carlo rendering</h3>
+          <p>
+            Implemented physically-based light transport using a modular
+            object-oriented C++ architecture.
+          </p>
+        </article>
+
+        <article>
+          <h3>Rendering features</h3>
+          <p>
+            Added texture mapping, rough material models, image-based
+            lighting, and homogeneous participating media.
+          </p>
+        </article>
+
+        <article>
+          <h3>Validation</h3>
+          <p>
+            Compared results against Mitsuba 3 using reference renders,
+            difference images, and statistical tests.
+          </p>
+        </article>
+      </div>
+    </section>
+
+    <section class="report-callout">
+      <div>
+        <h2>Technical report</h2>
+
+        <p>
+          Read the complete implementation details, validation experiments,
+          and rendering comparisons.
+        </p>
+      </div>
+
+      <a class="button primary" href="report.html">
+        Open Full Report
+      </a>
+    </section>
+  </main>
+
+  <footer>
+    <p>© 2024 Yağız Gençer</p>
+  </footer>
+</body>
+</html>

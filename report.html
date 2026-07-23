@@ -1,0 +1,496 @@
+**Final Project Report**
+
+<b>Student name:</b> Yagiz Gençer
+
+Final render
+============
+
+<div>
+    <img src="final_rendering/final.png" alt="final_render">
+</div>
+
+
+Motivation
+==========
+
+I chose to explore the theme of "reflections" by creating a surreal scene that blends the ordinary with the fantastical. In this scene, two Statues of Liberty, one gold and one silver, face each other and float on the water inside a mug with a wooden boat between them. Additionally, a military aircraft performs aerobatic maneuvers, leaving smoky trails behind it. While the statues seem to almost touch the clouds, it becomes evident that everything is inside a room, with the mug placed on a wooden table. In this way, I aimed to create an intriguing, dreamlike scene by merging real and unreal elements, indoor and outdoor settings, and contrasting scales.
+
+In line with the theme, the statues and boat have their reflections on the water in the mug. Furthermore, the clouds, mug, table, statues, and aircraft have all their reflections in the mirror, which is on the table. The scene features environmental lighting, and the surrounding environment—beach and ocean—is visible only through its reflection in the mirror. Finally, the two Statues of Liberty of different material facing each other appear side by side in their mirror reflections, holding their torches up to the sky in unity, enhancing the artistic quality of the scene.
+
+Feature list
+============
+
+<table>
+    <tr>
+        <th>Feature</th>
+        <th>Point count</th>
+        <th>Adjusted point count</th>
+    </tr>
+    <tr>
+        <td>Textures or Procedural images</td>
+        <td>10</td>
+        <td>10</td>
+    </tr>
+    <tr>
+        <td>Simple extra BSDFs (x2)</td>
+        <td>20</td>
+        <td>20</td>
+    </tr>
+    <tr>
+        <td>Image Based Lighting</td>
+        <td>20</td>
+        <td>20</td>
+    </tr>
+    <tr>
+        <td>Homogeneous participating media</td>
+        <td>30</td>
+        <td>30</td>
+    </tr>
+    <tr>
+        <td><strong>Total</strong></td>
+        <td>80</td>
+        <td>80</td>
+    </tr>
+</table>
+
+For all the renderings used for the validation, I use the volumetric path tracer integrator with emitter sampling I implemented
+for the "homogeneous participating media" feature. Mitsuba 3 is used for the reference renderer. For all the cases, 256 samples per
+pixel is used both for my rendering and for Mitsuba 3.
+
+<b>Important note:</b><br />
+Below, for every rendering, I provide comparison with Mitsuba 3 renderer that uses "volpath" integrator. This integrator uses MIS
+technique, whereas I only use emitter sampling (next event estimation) in my volumetric path tracer integrator that I adapted from my "path_ems" integrator. Furthermore, Mitsuba 3
+makes use of some advanced filtering techniques that I lack in my project. Therefore, although I verify that there are no visible systematic
+differences between my renderings and that of Mitsuba's and the error is always normally distributed with no systematic and geometric error patterns,
+there are occasional very slight differences (about 0.001) in image histograms, which I think to be due to noise caused by Monte Carlo approach and differences in integration technique.
+
+Feature 1: Textures
+=========
+For texture, I implemented a "Texture" class in "texture.cpp" and "texture.h" files. The class holds a texture image as an array
+of Color3f arrays as well as the filename and the dimensions of the image. It also has a "getTextureColor()" method that returns the color
+of the image given a UV coordinate by applying bilinear interpolation. Furthermore, I implemented a class called "ImgTexture" that
+inherits from "Texture" class and fills the texture image object by reading from the filename and also applying Gamma correction as
+suggested in PBRT Edition 3 section 10.4. In my implementation, textures are properties of a scene specified by their filenames as strings. They are
+stored in a "Texture" vector called "m_textures" and can be obtained using "scene->getTextures()" command in the integrator.
+In the integrator, whenever a diffuse object intersection is found with its filename not an empty string, we find which texture it is and
+get the corresponding texture color using the UV coordinate of the intersection and store it in "texture_albedo" variable, which is
+set to Color3f(-1.0f) by default. Whenever we use "eval()" or "sample()" methods of a BSDF, we call these methods now together with texture_albedo, not just the
+query record. These new implementations of "eval()" and "sample()" methods call their old versions if they are not implemented for a specific
+BSDF. If they are implemented (for diffuse BSDFs), they use texture_albedo parameter as their albedo value in their calculations if texture_albedo is not Color3f(-1.0f)
+(if there is a texture). Otherwise, they use their usual specified albedo's.
+
+Now, I verify the implementation using two textures in the cbox scene:<br />
+
+<b>Watermelon and wood textures in cbox scene (Left: Mitsuba 3, Right: My Rendering):</b>
+<div class="twentytwenty-container">
+    <img src="images/texture1_mitsuba.png" alt="Reference">
+    <img src="images/texture1_nori.png" alt="Mine">
+</div>
+
+Watermelon texture: https://www.ttfabrics.com/item/2-221812/221827/fruit-cd1926-watermelon-stripes-texture/<br />
+Wood texture: https://freestocktextures.com/texture/cracked-old-wood-with-knots,1650.html
+
+<b>Difference between the images visualized in VS Code VERIV:</b>
+<div>
+    <img src="images/texture1_diff.png" alt="Texture1_Diff">
+</div>
+
+I created another scene in Blender for verification. In addition to a different wood texture for the table, I use another texture for the mug.
+Illumination is from a cube mesh light source from the top.<br />
+
+<b>Mug and wood textures in the new scene (Left: Mitsuba 3, Right: My Rendering):</b>
+<div class="twentytwenty-container">
+    <img src="images/texture2_mitsuba.png" alt="Reference">
+    <img src="images/texture2_nori.png" alt="Mine">
+</div>
+
+Mug texture: https://www.dreamstime.com/stock-images-texture-cup-tea-image19115114<br />
+Wood texture: https://www.pexels.com/photo/brown-wooden-surface-129733/<br />
+
+<b>Difference between the images visualized in VS Code VERIV:</b>
+<div>
+    <img src="images/texture2_diff.png" alt="Texture2_Diff">
+</div>
+
+
+
+Feature 2: Simple Extra BSDFs (2x)
+=========
+For this feature, I implemented rough conductor and rough dielectric BSDFs as suggested in feature list and I exactly followed
+the PBRT Edition 3 implementation for them in sections 9.6 and 9.7 respectively.
+
+## Rough Conductor BSDF
+This BSDF is implemented in "rough_conductor.cpp" file following the implementation of PBRT Edition 3 in section 9.6 for the
+eval(), pdf(), and sample() methods as mentioned. Furthermore, the index of refraction is a a complex valued Color3f for metals, so
+I kept the real and imaginary parts of it in "eta" and "k" Color3f variables respectively. Eval() method also need a new fresnel function for the conductors
+as explained in PBRT Edition 3 section 9.3.6 and I implemented this function in "common.cpp" file with the name "conductor_fresnel()".
+
+Now, I verify the implementation using gold and iron rough materials in cbox scene where "eta" is Color3f(2.0, 2.5, 3.0), and
+Color3f(2.94, 2.88, 2.73) for gold and iron respectively and "k" is Color3f(6.0, 4.0, 0.5) and Color3f(3.31, 3.05, 2.88) for
+gold and iron respectively.
+
+First, for the roughness "alpha" = 0.1:
+
+<b>Gold and Iron BSDFs in cbox scene for roughness alpha = 0.1 (Left: Mitsuba 3, Right: My Rendering):</b>
+<div class="twentytwenty-container">
+    <img src="images/conductor_mitsuba.png" alt="Reference">
+    <img src="images/conductor_nori.png" alt="Mine">
+</div>
+
+<b>Difference between the images visualized in VS Code VERIV:</b>
+<div>
+    <img src="images/conductor_diff.png" alt="Conductor_Diff">
+</div>
+
+Next, I also provide the comparison to Mitsuba 3 renderer for the roughness "alpha" = 0.3.
+
+<b>Gold and Iron BSDFs in cbox scene for roughness alpha = 0.3 (Left: Mitsuba 3, Right: My Rendering):</b>
+<div class="twentytwenty-container">
+    <img src="images/conductor2_mitsuba.png" alt="Reference">
+    <img src="images/conductor2_nori.png" alt="Mine">
+</div>
+
+<b>Difference between the images visualized in VS Code VERIV:</b>
+<div>
+    <img src="images/conductor2_diff.png" alt="Conductor_Diff">
+</div>
+
+
+Lastly, I use eta = Color3f(2.0, 4.0, 6.0), k = Color3f(6.0, 4.0, 2.0) for the left sphere and eta = Color3f(6.0, 4.0, 2.0), k = Color3f(2.0, 4.0, 6.0)
+for the right sphere with alpha = 0.2:
+
+<b>Comparison with a new set of eta and k values for alpha = 0.2 (Left: Mitsuba 3, Right: My Rendering):</b>
+<div class="twentytwenty-container">
+    <img src="images/conductor3_mitsuba.png" alt="Reference">
+    <img src="images/conductor3_nori.png" alt="Mine">
+</div>
+
+<b>Difference between the images visualized in VS Code VERIV:</b>
+<div>
+    <img src="images/conductor3_diff.png" alt="Conductor_Diff">
+</div>
+
+## Rough Dielectric BSDF
+This feature is implemented in "rough_dielectric.cpp" file. I implement this BSDF's "eval()", "pdf()", and "sample()" methods
+by exactly following the procedure provided in PBRT Edition 3 section 9.7.
+
+First, I again use the cbox scene with roughness parameter "alpha" = 0.01 and 0.1 for the left and right spheres, respectively:<br />
+
+<b>Rough dielectrics with alpha = 0.01 and 0.1 (Left: Mitsuba 3, Right: My Rendering):</b>
+<div class="twentytwenty-container">
+    <img src="images/dielectric_mitsuba.png" alt="Reference">
+    <img src="images/dielectric_nori.png" alt="Mine">
+</div>
+
+<b>Difference between the images visualized in VS Code VERIV:</b>
+<div>
+    <img src="images/dielectric_diff.png" alt="Dielectric_Diff">
+</div>
+
+Now I use roughness parameter "alpha" = 0.25 and 0.15 for the left and right spheres, respectively:<br />
+<b>Rough dielectrics with alpha = 0.25 and 0.15 (Left: Mitsuba 3, Right: My Rendering):</b>
+<div class="twentytwenty-container">
+    <img src="images/dielectric2_mitsuba.png" alt="Reference">
+    <img src="images/dielectric2_nori.png" alt="Mine">
+</div>
+
+<b>Difference between the images visualized in VS Code VERIV:</b>
+<div>
+    <img src="images/dielectric2_diff.png" alt="Dielectric_Diff">
+</div>
+
+Finally, I render the Ajax bust scene with environmental lighting from "pisa.exr" image from https://vgl.ict.usc.edu/Data/HighResProbes/
+resized to 2048x2048 square shape with roughness parameter "alpha" = 0.20:<br />
+
+<b>Rough dielectric Ajax bust with environmental lighting, alpha = 0.20 (Left: Mitsuba 3, Right: My Rendering):</b>
+<div class="twentytwenty-container">
+    <img src="images/dielectric3_mitsuba.png" alt="Reference">
+    <img src="images/dielectric3_nori.png" alt="Mine">
+</div>
+
+<b>Difference between the images visualized in VS Code VERIV:</b>
+<div>
+    <img src="images/dielectric3_diff.png" alt="Dielectric_Diff">
+</div>
+
+Feature 3: Image Based Lighting
+=========
+For this feature, I first implemented hierarchical sample warping introduced in Assignment #3's "Hacker Points" section. This is done by
+first implementing a child class of "Emitter" called "EnvLight". This class first reads the environmental image file in its
+constructor and then creates and stores a Mipmap of it following the approach in PBRT Edition 3 section 10.4. Note that here I assume the input image is a square
+image to allow for Mipmap creation, and therefore I resize the lighting images to a square size as a preprocessing step. I store the Mipmap as an array of array of
+arrays as it is a structure holding multiple images (each being an array of arrays). It also has methods for reading the radiance as a lookup
+from the highest resolution level of the Mipmap structure given a UV point or $ w_i $ incident direction. This class also has a "sample()" method that given a
+2D uniform sample, warps it hierarchically according to the mipmap, turns this warped 2D point to $ w_o $ outgoing sampled vector, reads the radiance and also
+calculates the PDF value for this sample. In the end, it returns (radiance, wo, pdf) tuple to be used by the integrator. To realize this function, I implemented
+"squareToHierarchicalWarped()" and "squareToHierarchicalPdf()" functions in "warp.cpp" file, where former warps a 2D point according to the Mipmap and the latter
+finds the probability of this warping.
+
+In the integrator, I have an "envLight" emitter pointer initialized as a null pointer and is filled if there is an environmental
+lighting image specified in the scene xml file. Then, following the PBRT Edition 3 approach in section 12.6, this environmental light source is imagined to be a sphere of two times
+the radius of the entire scene that surrounds the scene. My volume path tracer integrator uses "path_ems" approach and the necessary radiance, sampled direction and
+pdf values are obtained by implemented "sample()" method explained earlier.
+
+## Hierarchical Sample Warping Verification
+
+I first provide verification for hierarchical sample warping method using the statistical test I implemented in "warptest.cpp" file. As suggested in Assignment #3, the test is
+first applied on a 2x2 image:<br />
+
+<b>Sample distribution warped from a 2x2 image:</b>
+<div>
+    <img src="images/hier_1_1.png" alt="hier_1_1">
+</div>
+
+<b>Chi-squared test result for the sample distribution warped from a 2x2 image:</b>
+<div>
+    <img src="images/hier_1_2.png" alt="hier_1_2">
+</div>
+
+Now, I provide verification using a much larger "autumn_field_puresky_4k.exr" image ( https://polyhaven.com/a/autumn_field_puresky )
+that is resized to a square shape of 2048x2048.
+
+<b>Sample distribution warped from "autumn_field_puresky_4k.exr":</b>
+<div>
+    <img src="images/hier_2_1.png" alt="hier_2_1">
+</div>
+
+<b>Chi-squared test result for the sample distribution warped from "autumn_field_puresky_4k.exr":</b>
+<div>
+    <img src="images/hier_2_2.png" alt="hier_2_2">
+</div>
+
+## Scenes Rendered with Image-Based Lighting
+
+Now, I will verify the feature by comparing scenes I rendered using environmental lighting with their corresponding Mitsuba 3 renderings.
+First, I use "glacier.exr" image from https://vgl.ict.usc.edu/Data/HighResProbes/ that is reshaped to 512x512 square size. To prove that the scene
+renders the environmental lighting image itself if there are no intersections, here I remove all the objects from the scene and render an empty scene:
+
+<b>Comparison of an empty scene lightened by "glacier.exr" image (Left: Mitsuba 3, Right: My Rendering):</b>
+<div class="twentytwenty-container">
+    <img src="images/env1_mitsuba.png" alt="Reference">
+    <img src="images/env1_nori.png" alt="Mine">
+</div>
+
+<b>Difference between the images visualized in VS Code VERIV:</b>
+<div>
+    <img src="images/env1_diff.png" alt="Env1_Diff">
+</div>
+
+
+Now, I use "grace-new.exr" image from https://vgl.ict.usc.edu/Data/HighResProbes/ that is reshaped to 1536x1536 square size. The scene is the Ajax scene
+where I set the material of the bust to a mirror so that environmental lighting is visible on it. As one can see, the only difference between the
+images is the randomly distributed noise component.
+
+<b>Comparison of the mirror Ajax bust lightened by "grace-new.exr" image (Left: Mitsuba 3, Right: My Rendering):</b>
+<div class="twentytwenty-container">
+    <img src="images/env2_mitsuba.png" alt="Reference">
+    <img src="images/env2_nori.png" alt="Mine">
+</div>
+
+<b>Difference between the images visualized in VS Code VERIV:</b>
+<div>
+    <img src="images/env2_diff.png" alt="Env2_Diff">
+</div>
+
+Lastly, I render the cbox scene with lighting from "meadow_4k.exr" image ( https://polyhaven.com/a/meadow ) resized to 2048x2048 square size.
+The left sphere is dielectric while the right one is mirror. Furthermore, left and right walls are removed to allow us to see the underlying lighting
+image.
+
+<b>Comparison of the cbox scene lightened by "meadow_4k.exr" image (Left: Mitsuba 3, Right: My Rendering):</b>
+<div class="twentytwenty-container">
+    <img src="images/env3_mitsuba.png" alt="Reference">
+    <img src="images/env3_nori.png" alt="Mine">
+</div>
+
+<b>Difference between the images visualized in VS Code VERIV:</b>
+<div>
+    <img src="images/env3_diff.png" alt="Env3_Diff">
+</div>
+
+
+Feature 4: Homogeneous Participating Media
+=========
+To implement this feature, I needed Henyey-Greenstein phase function to model the scattering of the ray inside the homogeneous
+medium. For this, I implemented "sampleHenyeyGreenstein()" and "pdfHenyeyGreenstein()" functions in "warp.cpp" file. The former returns
+a outgoing direction $ w_o $ given an incident direction $ w_i $ for a specific value of "g" parameter and the latter returns the probability of
+sampling this particular outgoing direction  $ w_o $ given that $ w_i $ incident direction.
+
+For the homogeneous medium itself, I implemented a child class of "Medium" class called "HomogenousMedium" in "homogenous_medium.cpp" file.
+This class reads albedo, g, and $ \sigma_t $ values for the medium specified in the scene xml file and also calculates
+$ \sigma_s $ and $ \sigma_a $ values from them. It also has a "sample()" method that selects a channel of 3D $ \sigma_t $,
+samples a traveled distance within the homogeneous medium and decides if the ray still stays inside the medium or not, and returns
+Tr (attenuation coefficient) times $ \sigma_s $ divided by PDF or just Tr divided by PDF depending on if the ray is still inside the medium or
+not respectively. The implementation of this function follows exactly the implementation provided in PBRT Edition 3 section 15.2.
+
+I also implemented a function called "rayIntersectTr()" in "scene.h" file. This is a generalization of "rayIntersect()" function
+that was already implemented in Nori. This function is used during the emitter sampling phase in the integrator and instead of only
+returning a True or False as previously done with shadow rays, it is designed to also calculate the beam transmittance (or attenuation coefficient)
+up to the sampled light point if the ray goest through homogeneous media along its way. Basically, it initializes Tr with Color3f(1.0f) and begins a while loop.
+If the ray enters a homogeneous medium, this does not mean a complete occlusion now but Tr value should be decreased by a value determined by how long the
+ray has traveled in the medium and what are the attenuation parameters of the medium are. If the ray hits a standard object, Tr is returned as
+Color3f(0.0f), meaning a full occlusion. If not, a Tr value is returned, which is a constant that should multiply the radiance value provided by the light source
+as an attenuation factor. The implementation of this function very closely follows "IntersectTr()" function provided in PBRT Edition 3 section 11.3.
+
+I also implemented the medium property as an attribute of the current ray by adding a "Medium" pointer attribute to "ray.h" file, which is initialized by a null pointer.
+This medium pointer is a null pointer if the ray is not fully contained in a medium between its last two intersection points. Otherwise, it keeps the parameters of the medium it is
+contained in. Lastly, it is important to note that in order to support a shape for the medium, I implemented medium as an attribute of the "Mesh" class.
+If no medium is specified for a mesh in the xml file, this medium pointer is again a null pointer. Otherwise, the medium of a mesh can be obtained by calling the
+"getMedium()" function of the mesh.
+
+As the last step, I implemented a volumetric path tracer integrator in "path_volume.cpp" file. I keep the "path_ems" (emitter sampling)
+approach for the integrator but add the medium-awareness capability to it using the methods provided before. For this integrator, I exactly follow
+the "VolPathIntegrator" provided in PBRT Edition 3 section 15.3. However, the algorithm to be followed can be outlined as follows:
+
+1. We have a bool variable called "insideMedium", and we initialize it by "false" at the beginning of each iteration. This variable, given that the ray is fully contained in the medium (ray.medium is not a null pointer), tells whether we have sampled a point inside the medium so that we should have a scattering inside the medium using the phase function or we have sampled a point outside the medium so that the ray should pass through the medium (of course with attenuation) without being scattered to a new direction.
+
+2. If the ray is contained in the medium (not to mix it up with insideMedium - this just means that we are sure the ray traveled fully inside the medium between its last two intersection points but we will decide if it will be scattered within the medium or not by sampling a distance), we sample a distance using "sample()" method, sample a "t", and update the "insideMedium" bool variable accordingly. Furthermore, we multiply "beta" with the output of this call. Furthermore, we update our new intersection point according to the "t" sampled by traversing this distance in the ray direction. Note that as before, "Le" emitter component is calculated if the intersection point is on the light source and the last bounce is specular.
+
+3. If "insideMedium" is true, we first sample a point from the light source. Then, we use "rayIntersectTr()" method as a shadow ray, which also gives us the attenuation constant Tr. Furthermore, we get the probability of medium scattering the ray in this sample direction by calling "pdfHenyeyGreenstein()" method. Then, "Ld" direct illumination component is calculated using the geometric term, radiance value, probability, and attenuation constant. Now that we obtained the light contributions, we sample a new scattered direction using "sampleHenyeyGreenstein()" method of the medium and replace the ray's direction with this sampled direction. At the end, we leave the loop without any further updates.
+
+4. Otherwise, (if "insideMedium" is false), we first check if the new intersection is with a medium or not. If yes, we first take our ray's origin to this intersection point. If ray.medium was a null pointer before, we take the medium of the intersected mesh as new ray.medium because now the ray will be contained in this medium from that point to its next intersection. If it was not a null pointer, now the ray will leave its medium, so we set ray.medium to a null pointer. Here, if the BSDF of intersection is diffuse, we need to calculate an Ld direct illumination component. This is again done by sampling a light source point. The only difference now is that we use "rayIntersectTr()" method as a shadow ray which also calculates attenuation coefficient Tr for the cases where there happens to be some homogeneous media between the intersection point and the sampled light point. "Ld" component obtained is of course multiplied by this attenuation.
+
+5. The end of the loop is the same as in "path_ems", where we sample a new direction for the ray and update beta, eta, and specBounce variables.
+
+## Henyey-Greenstein Phase Function Verification
+
+I first provide verification for Henyey-Greenstein phase function using the statistical test I implemented in "warptest.cpp" file that uses these two functions explained earlier.
+The results will be shown for different selections of the "bsdfAngle" and "g" parameters.
+
+<b>Henyey-Greenstein warptest configuration for bsdfAngle = -26.8&deg , g = -0.7:</b>
+<div>
+    <img src="images/hg_1_1.png" alt="hg_1_1">
+</div>
+
+<b>Henyey-Greenstein chi-squared test result for bsdfAngle = -26.8&deg, g = -0.7:</b>
+<div>
+    <img src="images/hg_1_2.png" alt="hg_1_2">
+</div>
+
+<b>Henyey-Greenstein warptest configuration for bsdfAngle = 41.4&deg, g = 0:</b>
+<div>
+    <img src="images/hg_2_1.png" alt="hg_2_1">
+</div>
+
+<b>Henyey-Greenstein chi-squared test result for bsdfAngle = 41.4&deg, g = 0:</b>
+<div>
+    <img src="images/hg_2_2.png" alt="hg_2_2">
+</div>
+
+<b>Henyey-Greenstein warptest configuration for bsdfAngle = -60.8&deg, g = 0.9:</b>
+<div>
+    <img src="images/hg_3_1.png" alt="hg_3_1">
+</div>
+
+<b>Henyey-Greenstein chi-squared test result for bsdfAngle = -60.8&deg, g = 0.9:</b>
+<div>
+    <img src="images/hg_3_2.png" alt="hg_3_2">
+</div>
+
+## Scenes Rendered with Homogeneous Media
+
+Now, I will provide verification for this feature first by using different homogenous medium parameters for the spheres in the cbox scene.
+
+Left sphere: albedo: Color3f(0.4, 0.8, 0.4), $\sigma_t$ = Color3f(3.5, 3.5, 3.5), g = 0.5.<br />
+Right sphere: albedo: Color3f(0.8, 0.3, 0.5), $\sigma_t$ = Color3f(4.0, 4.0, 4.0), g = -0.9.
+
+<b>Comparison for homogenous medium with cbox scene (Left: Mitsuba 3, Right: My Rendering):</b>
+<div class="twentytwenty-container">
+    <img src="images/homogenous1_mitsuba.png" alt="Reference">
+    <img src="images/homogenous1_nori.png" alt="Mine">
+</div>
+
+<b>Difference between the images visualized in VS Code VERIV:</b>
+<div>
+    <img src="images/homogenous1_diff.png" alt="Homogenous1_Diff">
+</div>
+
+Now, let us try different set of parameters and also with varying $\sigma_t$ components for R, G and B channels:<br />
+
+Left sphere: albedo: Color3f(0.65, 0.70, 0.20), $\sigma_t$ = Color3f(2.8 2.4 2.0), g = 0.<br />
+Right sphere: albedo: Color3f(0.1, 0.6, 0.8), $\sigma_t$ = Color3f(1.5, 1.8, 2.1), g = 0.8.
+
+<b>Comparison for homogenous medium with cbox scene (Left: Mitsuba 3, Right: My Rendering):</b>
+<div class="twentytwenty-container">
+    <img src="images/homogenous2_mitsuba.png" alt="Reference">
+    <img src="images/homogenous2_nori.png" alt="Mine">
+</div>
+
+<b>Difference between the images visualized in VS Code VERIV:</b>
+<div>
+    <img src="images/homogenous2_diff.png" alt="Homogenous2_Diff">
+</div>
+
+Next, I render the Ajax scene with environmental lighting using "blouberg_sunrise_2_4k.exr" image ( https://polyhaven.com/a/blouberg_sunrise_2 ) resized
+to 1024x1024 square shape.
+
+Parameters used: albedo: Color3f(0.8, 0.5, 0.8), $\sigma_t$ = Color3f(2.7, 3.1, 4.2), g = 0.2.<br />
+
+<b>Comparison for homogenous medium with Ajax scene and environmental lighting (Left: Mitsuba 3, Right: My Rendering):</b>
+<div class="twentytwenty-container">
+    <img src="images/homogenous3_mitsuba.png" alt="Reference">
+    <img src="images/homogenous3_nori.png" alt="Mine">
+</div>
+
+<b>Difference between the images visualized in VS Code VERIV:</b>
+<div>
+    <img src="images/homogenous3_diff.png" alt="Homogenous3_Diff">
+</div>
+
+Lastly, I render the Ajax scene with a new set of parameters and with the area light provided in Assignment #5. I also set the exposure
+of the error visualization to its maximum value as the difference to the reference rendering is otherwise too small to be seen.<br />
+
+Parameters used: albedo: Color3f(1.0, 0.35, 0.0), $\sigma_t$ = Color3f(0.6, 0.7, 0.5), g = -0.1.<br />
+
+<b>Comparison for homogenous medium using the Ajax scene with area light (Left: Mitsuba 3, Right: My Rendering):</b>
+<div class="twentytwenty-container">
+    <img src="images/homogenous4_mitsuba.png" alt="Reference">
+    <img src="images/homogenous4_nori.png" alt="Mine">
+</div>
+
+<b>Difference between the images visualized in VS Code VERIV:</b>
+<div>
+    <img src="images/homogenous4_diff.png" alt="Homogenous4_Diff">
+</div>
+
+
+References
+========
+<b>Referenced algorithms and code fragments:</b><br />
+PBRT Edition 3: https://pbr-book.org/3ed-2018/contents<br />
+
+<b>Meshes used for the final rendering:</b><br />
+Mug: https://www.cgtrader.com/free-3d-models/household/other/simple-mug-06b9b39b-4b40-4133-99e2-483c41e25527<br />
+Statues of Liberty: https://free3d.com/3d-model/statue-of-liberty-30770.html<br />
+Boat: https://www.cgtrader.com/free-3d-models/various/various-models/wooden-boat-09a21dad-c4ff-44ba-92e2-1cc2aae336f7<br />
+Aircraft: https://www.cgtrader.com/free-3d-models/aircraft/military-aircraft/spitfire-8f159ea16ad0f36be77714fc8ab1dcae<br />
+Clouds: https://www.turbosquid.com/3d-models/cloud-polygon-blender-1-1895708<br />
+Aircraft smoke trails: https://www.cgtrader.com/free-3d-print-models/games-toys/game-accessories/6mm-8mm-rockets-and-smoke-trails
+
+
+<b>Textures used for the final rendering:</b><br />
+Mug and mirror frame: https://www.dreamstime.com/stock-images-texture-cup-tea-image19115114<br />
+Table and boat: https://www.pexels.com/photo/brown-wooden-surface-129733/<br />
+Walls: https://www.pexels.com/photo/wall-bricks-220182/<br />
+Aircraft: https://in.pinterest.com/pin/772648879809408486/
+
+<b>EXR files for environmental lighting:</b><br />
+https://vgl.ict.usc.edu/Data/HighResProbes/<br />
+https://polyhaven.com/hdris<br />
+
+
+Feedback
+========
+
+Thank you for your efforts in teaching and guiding us through this amazing course. Although it was a long and tedious journey,
+I greatly enjoyed and benefited from it more than any course I have ever taken.
+
+<!-- Slider -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="resources/jquery.event.move.js"></script>
+<script src="resources/jquery.twentytwenty.js"></script>
+<link href="resources/offcanvas.css" rel="stylesheet">
+<link href="resources/twentytwenty.css" rel="stylesheet" type="text/css" />
+<script>var markdeepOptions = {onLoad: function() {$(".twentytwenty-container").twentytwenty({default_offset_pct: 0.5, move_slider_on_hover: true});} };</script>
+<!-- Markdeep: -->
+<script src="https://morgan3d.github.io/markdeep/latest/markdeep.min.js?" charset="utf-8"></script>
+<script>window.alreadyProcessedMarkdeep||(document.body.style.visibility="visible")</script>
