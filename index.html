@@ -4,89 +4,199 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+  <title>Physically-Based Renderer in C++ | Yağız Gençer</title>
+
   <meta
     name="description"
-    content="A physically-based renderer implemented in C++ and validated against Mitsuba 3."
+    content="A physically-based renderer built in C++ on Nori for EPFL's CS-440 Advanced Computer Graphics: Monte Carlo path tracing, microfacet BSDFs, image-based lighting and participating media, statistically validated against Mitsuba 3."
   >
 
-  <title>Physically-Based Renderer in C++ | Yağız Gençer</title>
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Physically-Based Renderer in C++ | Yağız Gençer">
+  <meta
+    property="og:description"
+    content="Monte Carlo path tracing, microfacet BSDFs, image-based lighting and volumetric transport — built in C++ for EPFL's CS-440 and statistically validated against Mitsuba 3."
+  >
+  <meta
+    property="og:image"
+    content="https://yagizgencer.github.io/physically-based-renderer/final_rendering/final-og.jpg"
+  >
+  <meta property="og:url" content="https://yagizgencer.github.io/physically-based-renderer/">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+  >
 
   <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
+  <!-- Mirrored by topbarHTML() in site.js for the report page — keep in sync. -->
+  <div class="topbar">
+    <div class="shell">
+      <a class="topbar-brand" href="index.html">
+        <span>Yağız Gençer</span>
+        <span class="sep">/</span>
+        <span class="project">Physically-Based Renderer</span>
+      </a>
+
+      <nav class="topbar-nav" aria-label="Site">
+        <a href="index.html" aria-current="page">Overview</a>
+        <a href="report.html">Technical Report</a>
+      </nav>
+    </div>
+  </div>
+
   <main>
-    <section class="hero">
-      <p class="eyebrow">EPFL · Advanced Computer Graphics</p>
+    <section class="hero shell">
+      <p class="eyebrow">EPFL · CS-440 Advanced Computer Graphics · Spring 2024</p>
 
       <h1>Physically-Based Renderer in C++</h1>
 
-      <p class="intro">
-        A physically-based renderer developed using object-oriented design
-        and Monte Carlo path tracing, with implementations statistically
-        validated against Mitsuba 3.
-      </p>
+      <div class="hero-body">
+        <p class="intro">
+          A physically-based renderer built on
+          <a href="https://wjakob.github.io/nori/" target="_blank" rel="noopener">Nori</a>,
+          the minimalist C++ ray tracer of EPFL's
+          <a href="https://rgl.epfl.ch/courses/ACG24" target="_blank" rel="noopener">CS-440
+          Advanced Computer Graphics</a> course. Every feature below is implemented from
+          scratch and <strong>statistically validated against
+          <a href="https://www.mitsuba-renderer.org/" target="_blank" rel="noopener">Mitsuba
+          3</a>, a research-grade renderer.</strong>
+        </p>
+
+        <dl class="meta-list">
+          <div>
+            <dt>Instructor</dt>
+            <dd>Prof. Wenzel Jakob</dd>
+          </div>
+
+          <div>
+            <dt>Research group</dt>
+            <dd>Realistic Graphics Lab, EPFL</dd>
+          </div>
+        </dl>
+      </div>
 
       <div class="actions">
         <a class="button primary" href="report.html">
-          View Technical Report
+          Read the Technical Report
         </a>
 
         <a class="button secondary" href="#final-render">
-          View Final Render
+          View the Final Render
         </a>
       </div>
     </section>
 
-    <section id="final-render" class="render-section">
-      <img
-        src="final_rendering/final.png"
-        alt="Final scene rendered using the custom physically-based renderer"
-      >
+    <section id="final-render" class="render-section shell">
+      <div class="section-head">
+        <h2>Final Render</h2>
+        <p class="section-note">1920 × 1080</p>
+      </div>
 
-      <p class="caption">
-        Final scene created in Blender and rendered using the implemented
-        C++ renderer.
-      </p>
+      <figure class="render">
+        <a class="zoomable" href="final_rendering/final.png" aria-label="Enlarge the final render">
+          <img
+            src="final_rendering/final-1600.jpg"
+            data-zoomable
+            data-full="final_rendering/final.png"
+            width="1920"
+            height="1080"
+            alt="Two Statues of Liberty floating on water inside a mug, with a wooden boat, aircraft leaving smoke trails, clouds, and a mirror reflecting a beach environment"
+          >
+        </a>
+
+        <figcaption>
+          Modelled in Blender and rendered end to end with this C++ engine. The scene
+          explores the theme of reflections: the statues and boat reflect in the water
+          inside the mug, while the mirror on the table reveals a beach environment that
+          is otherwise visible only through image-based lighting. Entered in the CS-440
+          rendering competition, judged by an independent panel of computer graphics experts.
+        </figcaption>
+      </figure>
     </section>
 
-    <section class="highlights">
-      <h2>Project highlights</h2>
+    <section class="highlights shell">
+      <h2>What is implemented</h2>
 
       <div class="grid">
         <article>
-          <h3>Monte Carlo rendering</h3>
+          <span class="tag">Light transport</span>
+          <h3>Monte Carlo path tracing</h3>
           <p>
-            Implemented physically-based light transport using a modular
-            object-oriented C++ architecture.
+            Unbiased path tracing with next-event estimation, built on a modular
+            object-oriented C++ architecture in which integrators, BSDFs, emitters
+            and media are independently pluggable.
           </p>
         </article>
 
         <article>
-          <h3>Rendering features</h3>
+          <span class="tag">Appearance</span>
+          <h3>Texture mapping</h3>
           <p>
-            Added texture mapping, rough material models, image-based
-            lighting, and homogeneous participating media.
+            Image textures with bilinear interpolation and gamma correction, threaded
+            through the BSDF <code>eval()</code> and <code>sample()</code> interfaces so any
+            diffuse surface can be textured from the scene description.
           </p>
         </article>
 
         <article>
-          <h3>Validation</h3>
+          <span class="tag">Materials</span>
+          <h3>Microfacet BSDFs</h3>
           <p>
-            Compared results against Mitsuba 3 using reference renders,
-            difference images, and statistical tests.
+            Rough conductor and rough dielectric models with microfacet distributions
+            and a complex index-of-refraction Fresnel term for metals, following
+            <a href="https://pbr-book.org/3ed-2018/contents" target="_blank" rel="noopener">PBRT</a>
+            §9.6–9.7.
+          </p>
+        </article>
+
+        <article>
+          <span class="tag">Illumination</span>
+          <h3>Image-based lighting</h3>
+          <p>
+            HDR environment emitter importance-sampled by hierarchical sample warping
+            over a mipmap of the light probe, giving low-variance estimates of
+            high-contrast environments.
+          </p>
+        </article>
+
+        <article>
+          <span class="tag">Volumetrics</span>
+          <h3>Participating media</h3>
+          <p>
+            Volumetric path tracer with the Henyey–Greenstein phase function, spectral
+            distance sampling, and beam transmittance carried along shadow rays so
+            media attenuate direct lighting correctly.
+          </p>
+        </article>
+
+        <article>
+          <span class="tag">Verification</span>
+          <h3>Validated against Mitsuba 3</h3>
+          <p>
+            Every feature cross-checked at 256 samples per pixel against Mitsuba 3
+            reference renders, with per-pixel difference images and χ² tests confirming
+            the sampling routines match their PDFs.
           </p>
         </article>
       </div>
     </section>
 
-    <section class="report-callout">
+    <section class="report-callout shell">
       <div>
         <h2>Technical report</h2>
 
         <p>
-          Read the complete implementation details, validation experiments,
-          and rendering comparisons.
+          Full derivations, implementation notes, side-by-side comparison sliders against
+          Mitsuba 3, difference images and χ² test results for every feature.
         </p>
       </div>
 
@@ -97,7 +207,15 @@
   </main>
 
   <footer>
-    <p>© 2024 Yağız Gençer</p>
+    <div class="shell">
+      <p>© 2024 Yağız Gençer</p>
+
+      <div class="footer-links">
+        <a href="report.html">Technical Report</a>
+      </div>
+    </div>
   </footer>
+
+  <script src="site.js" defer></script>
 </body>
 </html>

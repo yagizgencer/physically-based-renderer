@@ -1,11 +1,39 @@
+/* ==========================================================================
+   Shared design system — loaded by index.html and report.html.
+   Report-specific Markdeep overrides live in report.css.
+   ========================================================================== */
+
 :root {
-  --background: #f7f7f5;
+  --bg: #f7f7f5;
   --surface: #ffffff;
-  --text: #171717;
-  --muted: #626262;
-  --border: #deded8;
+  --surface-2: #f1f1ee;
+  --text: #16181c;
+  --muted: #5c6169;
+  --border: #e2e2dc;
   --accent: #184e77;
-  --content-width: 1120px;
+  --accent-hover: #123a58;
+  --accent-soft: #e8eef4;
+
+  --shell: 1240px;
+  --gutter: 64px;
+  --measure: 68ch;
+  --topbar-h: 68px;
+  --radius: 12px;
+
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 5%);
+  --shadow-md: 0 8px 30px rgb(0 0 0 / 8%);
+  --shadow-lg: 0 24px 70px rgb(0 0 0 / 16%);
+
+  --font-sans:
+    Inter,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    Helvetica,
+    Arial,
+    sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 
 * {
@@ -14,83 +42,169 @@
 
 html {
   scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
   margin: 0;
-  background: var(--background);
+  padding-top: var(--topbar-h);
+  background: var(--bg);
   color: var(--text);
-  font-family:
-    Inter,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    sans-serif;
+  font-family: var(--font-sans);
+  font-size: 17px;
   line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-main {
-  width: min(var(--content-width), calc(100% - 40px));
-  margin: 0 auto;
+img {
+  max-width: 100%;
 }
 
-.hero {
-  max-width: 900px;
-  padding: 90px 0 65px;
+/* --------------------------------------------------------------------------
+   Shell — the single container width that makes both pages feel like one site
+   -------------------------------------------------------------------------- */
+
+.shell {
+  width: min(var(--shell), 100% - var(--gutter));
+  margin-inline: auto;
 }
 
-.eyebrow {
-  margin: 0 0 14px;
+/* --------------------------------------------------------------------------
+   Top bar (fixed, so it also works inside the report's CSS grid)
+   -------------------------------------------------------------------------- */
+
+.topbar {
+  position: fixed;
+  z-index: 100;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: var(--topbar-h);
+  background: rgb(247 247 245 / 88%);
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: saturate(180%) blur(12px);
+  -webkit-backdrop-filter: saturate(180%) blur(12px);
+}
+
+.topbar .shell {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  height: 100%;
+}
+
+.topbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  overflow: hidden;
+  color: var(--text);
+  font-size: 1.0625rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.topbar-brand .sep {
+  color: var(--border);
+  font-weight: 400;
+}
+
+.topbar-brand .project {
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.topbar-nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.topbar-nav a {
+  padding: 8px 14px;
+  border-radius: 8px;
+  color: var(--muted);
+  font-size: 0.9688rem;
+  font-weight: 550;
+  text-decoration: none;
+  transition: background 140ms ease, color 140ms ease;
+}
+
+.topbar-nav a:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.topbar-nav a[aria-current="page"] {
+  background: var(--accent-soft);
   color: var(--accent);
-  font-size: 0.9rem;
-  font-weight: 700;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
+}
+
+/* --------------------------------------------------------------------------
+   Shared typography
+   -------------------------------------------------------------------------- */
+
+h1,
+h2,
+h3 {
+  scroll-margin-top: calc(var(--topbar-h) + 16px);
 }
 
 h1 {
-  max-width: 900px;
   margin: 0;
-  font-size: clamp(3rem, 8vw, 5.8rem);
-  line-height: 1;
-  letter-spacing: -0.055em;
+  font-size: clamp(2.1rem, 4.85vw, 3.875rem);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
 }
 
 h2 {
-  margin: 0 0 20px;
-  font-size: clamp(2rem, 4vw, 3rem);
-  line-height: 1.1;
-  letter-spacing: -0.035em;
+  margin: 0 0 18px;
+  font-size: clamp(1.75rem, 3vw, 2.375rem);
+  font-weight: 660;
+  line-height: 1.15;
+  letter-spacing: -0.025em;
 }
 
 h3 {
-  margin: 0 0 10px;
-  font-size: 1.2rem;
+  margin: 0 0 8px;
+  font-size: 1.0625rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
 }
 
-.intro {
-  max-width: 760px;
-  margin: 28px 0;
-  color: var(--muted);
-  font-size: 1.2rem;
+a {
+  color: var(--accent);
 }
 
-.actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
+.eyebrow {
+  margin: 0 0 18px;
+  color: var(--accent);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
 }
+
+/* --------------------------------------------------------------------------
+   Buttons
+   -------------------------------------------------------------------------- */
 
 .button {
   display: inline-block;
-  padding: 12px 18px;
+  padding: 12px 20px;
   border: 1px solid var(--accent);
-  border-radius: 8px;
-  font-weight: 650;
+  border-radius: 9px;
+  font-size: 0.9375rem;
+  font-weight: 620;
   text-decoration: none;
-  transition:
-    transform 150ms ease,
-    background 150ms ease;
+  transition: transform 150ms ease, background 150ms ease, box-shadow 150ms ease;
 }
 
 .button:hover {
@@ -100,97 +214,491 @@ h3 {
 .button.primary {
   background: var(--accent);
   color: #ffffff;
+  box-shadow: var(--shadow-sm);
+}
+
+.button.primary:hover {
+  background: var(--accent-hover);
+  box-shadow: 0 8px 20px rgb(24 78 119 / 25%);
 }
 
 .button.secondary {
-  background: transparent;
+  background: var(--surface);
   color: var(--accent);
 }
 
-.render-section {
-  padding: 20px 0 75px;
+.button.secondary:hover {
+  background: var(--accent-soft);
 }
 
-.render-section img {
+/* --------------------------------------------------------------------------
+   Hero
+   -------------------------------------------------------------------------- */
+
+.hero {
+  padding: 76px 0 56px;
+}
+
+.hero-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+  gap: 28px 64px;
+  align-items: start;
+  margin-top: 32px;
+}
+
+.intro {
+  max-width: var(--measure);
+  margin: 0;
+  color: var(--muted);
+  font-size: 1.1875rem;
+  line-height: 1.62;
+}
+
+.intro strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.intro a {
+  color: var(--text);
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-color: rgb(24 78 119 / 40%);
+  text-underline-offset: 3px;
+}
+
+.intro a:hover {
+  color: var(--accent);
+  text-decoration-color: var(--accent);
+}
+
+.meta-list {
+  margin: 4px 0 0;
+  padding: 20px 22px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.meta-list div + div {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+
+.meta-list dt {
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.meta-list dd {
+  margin: 4px 0 0;
+  font-size: 0.9375rem;
+  font-weight: 550;
+  line-height: 1.45;
+}
+
+.meta-list dd a {
+  text-decoration: none;
+}
+
+.meta-list dd a:hover {
+  text-decoration: underline;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 34px;
+}
+
+/* --------------------------------------------------------------------------
+   Final render figure
+   -------------------------------------------------------------------------- */
+
+.render-section {
+  padding: 28px 0 80px;
+}
+
+.render-section .section-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px 24px;
+  margin-bottom: 20px;
+}
+
+.render-section h2 {
+  margin: 0;
+}
+
+.section-note {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+
+figure.render {
+  margin: 0;
+}
+
+.zoomable {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  cursor: zoom-in;
+}
+
+.zoomable img {
   display: block;
   width: 100%;
-  border-radius: 12px;
-  box-shadow: 0 20px 60px rgb(0 0 0 / 14%);
+  height: auto;
+  transition: transform 400ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-.caption {
-  margin: 16px 0 0;
-  color: var(--muted);
-  font-size: 0.95rem;
+.zoomable:hover img {
+  transform: scale(1.012);
 }
+
+.zoomable::after {
+  content: "⤢ Click to enlarge";
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: rgb(10 12 16 / 62%);
+  color: #ffffff;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  opacity: 0;
+  transition: opacity 200ms ease;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  pointer-events: none;
+}
+
+.zoomable:hover::after,
+.zoomable:focus-visible::after {
+  opacity: 1;
+}
+
+figure.render figcaption {
+  /* Deliberately unconstrained: this sits under a full-shell-width image, and
+     a narrower measure here reads as a broken margin rather than a text column. */
+  margin: 18px 0 0;
+  color: var(--muted);
+  font-size: 0.9375rem;
+  line-height: 1.6;
+}
+
+/* --------------------------------------------------------------------------
+   Feature cards
+   -------------------------------------------------------------------------- */
 
 .highlights {
-  padding: 70px 0;
+  padding: 8px 0 76px;
 }
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 18px;
+  margin-top: 32px;
 }
 
 .grid article {
-  padding: 26px;
+  padding: 26px 26px 28px;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: var(--radius);
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.grid article:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+}
+
+.grid .tag {
+  display: block;
+  margin-bottom: 14px;
+  color: var(--accent);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
 }
 
 .grid p {
   margin: 0;
   color: var(--muted);
+  font-size: 0.9375rem;
+  line-height: 1.6;
 }
+
+.grid p code {
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: var(--surface-2);
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+}
+
+/* --------------------------------------------------------------------------
+   Report call-out
+   -------------------------------------------------------------------------- */
 
 .report-callout {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 30px;
-  margin: 60px 0 90px;
-  padding: 38px;
+  gap: 36px;
+  /* `auto` matters: this element also carries .shell, whose margin-inline:auto
+     a plain `margin: 0 0 88px` shorthand would silently cancel. */
+  margin: 0 auto 88px;
+  padding: 40px;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: var(--radius);
 }
 
 .report-callout h2 {
   margin-bottom: 10px;
+  font-size: clamp(1.5rem, 2.2vw, 1.875rem);
 }
 
 .report-callout p {
-  max-width: 650px;
+  max-width: 62ch;
   margin: 0;
   color: var(--muted);
+  font-size: 0.9375rem;
 }
 
+/* --------------------------------------------------------------------------
+   Footer
+   -------------------------------------------------------------------------- */
+
 footer {
-  padding: 28px 20px;
+  padding: 30px 0 40px;
   border-top: 1px solid var(--border);
   color: var(--muted);
-  text-align: center;
+  font-size: 0.875rem;
+}
+
+footer .shell {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 24px;
+}
+
+footer p {
+  margin: 0;
+}
+
+.footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.footer-links a {
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.footer-links a:hover {
+  color: var(--accent);
+  text-decoration: underline;
+}
+
+/* --------------------------------------------------------------------------
+   Lightbox (shared by both pages, built lazily by site.js)
+   -------------------------------------------------------------------------- */
+
+.lightbox {
+  position: fixed;
+  z-index: 1000;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3vmin;
+  background: rgb(10 12 16 / 92%);
+  opacity: 0;
+  transition: opacity 180ms ease;
+  cursor: zoom-out;
+}
+
+/* Required: the rule above sets display:flex, which beats the UA stylesheet's
+   [hidden]{display:none}. Without this the closed lightbox stays laid out at
+   opacity 0 — an invisible full-screen layer that keeps the zoom-out cursor
+   and eats every click on the page. */
+.lightbox[hidden] {
+  display: none;
+}
+
+.lightbox.is-open {
+  opacity: 1;
+}
+
+.lightbox img {
+  max-width: 100%;
+  max-height: 94vh;
+  border-radius: 6px;
+  object-fit: contain;
+  box-shadow: 0 30px 90px rgb(0 0 0 / 60%);
+  transform: scale(0.985);
+  transition: transform 180ms ease;
+}
+
+.lightbox.is-open img {
+  transform: scale(1);
+}
+
+.lightbox-close {
+  position: absolute;
+  top: 16px;
+  right: 20px;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  border: 1px solid rgb(255 255 255 / 22%);
+  border-radius: 50%;
+  background: rgb(255 255 255 / 10%);
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 150ms ease;
+}
+
+.lightbox-close:hover {
+  background: rgb(255 255 255 / 22%);
+}
+
+body.lightbox-open {
+  overflow: hidden;
+}
+
+/* Chrome promotes elements with backdrop-filter above later siblings, so the
+   top bar paints through the lightbox scrim no matter how high its z-index is.
+   Take it out of the picture instead — it also reads better over a full-bleed
+   image. */
+body.lightbox-open .topbar {
+  display: none;
+}
+
+/* --------------------------------------------------------------------------
+   Responsive
+   -------------------------------------------------------------------------- */
+
+@media (max-width: 1080px) {
+  .hero-body {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 28px;
+  }
+
+  .meta-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 18px;
+  }
+
+  .meta-list div + div {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: none;
+  }
 }
 
 @media (max-width: 760px) {
-  main {
-    width: min(100% - 24px, var(--content-width));
+  :root {
+    --gutter: 32px;
+  }
+
+  body {
+    font-size: 16px;
   }
 
   .hero {
-    padding-top: 60px;
+    padding: 44px 0 36px;
   }
 
-  .grid {
-    grid-template-columns: 1fr;
+  .topbar-brand .sep,
+  .topbar-brand .project {
+    display: none;
+  }
+
+  .topbar-nav a {
+    padding: 6px 9px;
+  }
+
+  .render-section {
+    padding-bottom: 56px;
+  }
+
+  .zoomable::after {
+    opacity: 1;
+    right: 10px;
+    bottom: 10px;
+    padding: 6px 11px;
+    font-size: 0.75rem;
   }
 
   .report-callout {
     align-items: flex-start;
     flex-direction: column;
     padding: 28px;
+  }
+}
+
+@media (max-width: 560px) {
+  :root {
+    --gutter: 24px;
+  }
+
+  .topbar-nav a {
+    padding: 6px 8px;
+    font-size: 0.8125rem;
+  }
+
+  .topbar-brand {
+    font-size: 0.875rem;
+  }
+
+  .hero-body {
+    margin-top: 24px;
+  }
+
+  .actions {
+    margin-top: 26px;
+  }
+
+  .actions .button {
+    flex: 1 1 100%;
+    text-align: center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  * {
+    transition-duration: 0.01ms !important;
   }
 }

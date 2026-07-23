@@ -1,0 +1,435 @@
+/* ==========================================================================
+   report.css — Markdeep overrides. Loaded AFTER style.css and twentytwenty.css.
+
+   Markdeep injects its own stylesheet by *prepending* it to <head>, so links
+   placed in the document body already win ties. Selectors are still prefixed
+   with `#md` (Markdeep sets body id="md" and wraps content in div.md) so the
+   cascade is never in question.
+
+   Rendered structure:
+     <body id="md">
+       <div class="md">
+         <div class="title">, <div class="afterTitles">, <p>,
+         <div class="longTOC">,
+         <section class="h1-section"> … <section class="h2-section"> … </section> </section> × N
+       </div>
+       <div class="markdeepFooter">
+     </body>
+   Headings carry no id; navigation uses <a class="target" name="…"> anchors.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Undo Markdeep's page frame (max-width:680px, justified Palatino)
+   -------------------------------------------------------------------------- */
+
+body#md {
+  max-width: none;
+  margin: 0;
+  padding: var(--topbar-h) 0 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 17px;
+  line-height: 1.65;
+  text-align: left;
+}
+
+/* --------------------------------------------------------------------------
+   Two-column shell: sticky contents sidebar + reading column
+   -------------------------------------------------------------------------- */
+
+#md .md {
+  display: grid;
+  grid-template-columns: 264px minmax(0, 1fr);
+  column-gap: 64px;
+  align-items: start;
+  width: min(var(--shell), 100% - var(--gutter));
+  margin-inline: auto;
+  padding: 44px 0 40px;
+}
+
+#md .md > * {
+  grid-column: 2;
+  min-width: 0;
+}
+
+#md .md > .longTOC {
+  /* Span every row so `sticky` has a full-height containing block.
+     `1 / -1` does not work here — the grid rows are all implicit. */
+  grid-column: 1;
+  grid-row: 1 / span 50;
+  position: sticky;
+  top: calc(var(--topbar-h) + 28px);
+  align-self: start;
+  max-height: calc(100vh - var(--topbar-h) - 60px);
+  margin: 0;
+  padding: 0 4px 0 18px;
+  border-left: 1px solid var(--border);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+#md .md > .longTOC .tocHeader {
+  margin: 0 0 14px;
+  padding: 0;
+  border: none;
+  color: var(--muted);
+  font-family: var(--font-sans);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+/* Markdeep emits the entries as inline <a>s separated by <br> and indented
+   with literal &nbsp; text nodes. Collapse the whitespace to zero and lay the
+   links out as blocks instead. */
+#md .md > .longTOC p {
+  margin: 0;
+  font-size: 0;
+  line-height: 0;
+}
+
+#md .md > .longTOC br {
+  display: none;
+}
+
+#md .md > .longTOC a.level1,
+#md .md > .longTOC a.level2 {
+  display: block;
+  margin: 0;
+  padding: 6px 10px;
+  border-radius: 6px;
+  color: var(--muted);
+  font-family: var(--font-sans);
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  text-decoration: none;
+  transition: background 130ms ease, color 130ms ease;
+}
+
+#md .md > .longTOC a.level1 {
+  margin-top: 2px;
+  font-weight: 600;
+}
+
+#md .md > .longTOC a.level2 {
+  padding-left: 26px;
+  font-weight: 450;
+}
+
+#md .md > .longTOC a:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+#md .md > .longTOC a.is-active {
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-weight: 650;
+}
+
+#md .md > .longTOC .tocNumber {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+#md .md > .longTOC a.is-active .tocNumber {
+  color: var(--accent);
+}
+
+/* --------------------------------------------------------------------------
+   Document title block
+   -------------------------------------------------------------------------- */
+
+#md .md div.title {
+  margin: 0 0 4px;
+  padding: 0;
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: clamp(2rem, 3.4vw, 2.75rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.08;
+  text-align: left;
+}
+
+#md .md div.afterTitles {
+  height: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Headings
+   -------------------------------------------------------------------------- */
+
+#md .md h1,
+#md .md h2,
+#md .md h3,
+#md .md h4,
+#md .md h5,
+#md .md h6 {
+  margin: 0 0 16px;
+  padding: 0;
+  color: var(--text);
+  font-family: var(--font-sans);
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+}
+
+#md .md h1 {
+  margin-top: 56px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+  font-size: 1.75rem;
+  font-weight: 680;
+}
+
+#md .md section.h1-section:first-of-type h1 {
+  margin-top: 24px;
+}
+
+#md .md h2 {
+  margin-top: 44px;
+  border-bottom: none;
+  color: var(--text);
+  font-size: 1.25rem;
+  font-weight: 650;
+}
+
+#md .md h3,
+#md .md h4,
+#md .md h5,
+#md .md h6 {
+  margin-top: 32px;
+  color: var(--text);
+  font-size: 1.0625rem;
+  font-weight: 650;
+}
+
+/* Markdeep's anchors are what fragment links actually target; clear the fixed
+   top bar instead of its default 20px nudge. */
+#md .md a.target {
+  top: 0;
+  scroll-margin-top: calc(var(--topbar-h) + 28px);
+}
+
+/* --------------------------------------------------------------------------
+   Body copy
+   -------------------------------------------------------------------------- */
+
+#md .md p {
+  margin: 0 0 18px;
+  font-size: 1.0625rem;
+  line-height: 1.72;
+}
+
+#md .md b,
+#md .md strong {
+  color: var(--text);
+  font-weight: 640;
+}
+
+#md .md ol,
+#md .md ul {
+  margin: 0 0 18px;
+  padding-left: 24px;
+}
+
+#md .md li {
+  margin-bottom: 10px;
+  line-height: 1.7;
+}
+
+/* Markdeep forces Georgia on links; and the References section contains raw
+   100-character URLs that would otherwise overflow the column. */
+#md .md a:link,
+#md .md a:visited {
+  color: var(--accent);
+  font-family: inherit;
+  overflow-wrap: anywhere;
+  text-decoration: none;
+}
+
+#md .md a:link:hover {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+#md .md code {
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: var(--surface-2);
+  font-family: var(--font-mono);
+  font-size: 0.875em;
+}
+
+/* --------------------------------------------------------------------------
+   Feature table (replaces the gray borders that came from offcanvas.css)
+   -------------------------------------------------------------------------- */
+
+#md .md table {
+  width: 100%;
+  margin: 8px 0 32px;
+  border: 1px solid var(--border);
+  border-collapse: separate;
+  border-spacing: 0;
+  border-radius: 10px;
+  background: var(--surface);
+  overflow: hidden;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+
+#md .md table th {
+  padding: 12px 18px;
+  background: var(--surface-2);
+  border: none;
+  border-bottom: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-align: left;
+  text-transform: uppercase;
+}
+
+#md .md table td {
+  padding: 13px 18px;
+  border: none;
+  border-top: 1px solid var(--border);
+  text-align: left;
+}
+
+#md .md table tr:first-child td {
+  border-top: none;
+}
+
+#md .md table tr:last-child td {
+  background: var(--accent-soft);
+  font-weight: 650;
+}
+
+/* --------------------------------------------------------------------------
+   Figures
+   -------------------------------------------------------------------------- */
+
+#md .md img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 6px auto 34px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: var(--shadow-md);
+  cursor: zoom-in;
+}
+
+/* --------------------------------------------------------------------------
+   Mitsuba 3 comparison sliders
+   -------------------------------------------------------------------------- */
+
+#md .md .twentytwenty-wrapper {
+  margin: 8px 0 34px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+}
+
+/* Source images are 800px wide; force them to fill the (wider) column so the
+   slider geometry that twentytwenty computes from the image box stays correct. */
+#md .md .twentytwenty-container img {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  cursor: ew-resize;
+}
+
+#md .twentytwenty-before-label:before,
+#md .twentytwenty-after-label:before {
+  background: rgb(10 12 16 / 62%);
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+/* --------------------------------------------------------------------------
+   Markdeep attribution footer (sibling of div.md, not inside the grid)
+   -------------------------------------------------------------------------- */
+
+#md .markdeepFooter {
+  width: min(var(--shell), 100% - var(--gutter));
+  margin: 0 auto;
+  padding: 24px 0 40px;
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 11px;
+  text-align: center;
+}
+
+#md .markdeepFooter a {
+  color: var(--muted) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Responsive
+   -------------------------------------------------------------------------- */
+
+@media (max-width: 1080px) {
+  #md .md {
+    grid-template-columns: minmax(0, 1fr);
+    padding-top: 32px;
+  }
+
+  #md .md > * {
+    grid-column: 1;
+  }
+
+  #md .md > .longTOC {
+    grid-row: auto;
+    position: static;
+    max-height: none;
+    margin: 4px 0 36px;
+    padding: 20px 22px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+  }
+
+  #md .md > .longTOC p {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 2px 12px;
+  }
+}
+
+@media (max-width: 760px) {
+  body#md {
+    font-size: 16px;
+  }
+
+  #md .md p {
+    font-size: 1rem;
+  }
+
+  #md .md h1 {
+    margin-top: 48px;
+    font-size: 1.5rem;
+  }
+
+  #md .md img,
+  #md .md .twentytwenty-wrapper {
+    margin-bottom: 26px;
+  }
+
+  #md .md table {
+    display: block;
+    overflow-x: auto;
+  }
+}
